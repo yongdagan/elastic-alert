@@ -1,1 +1,1 @@
-# ElkAlert
+# elk-alert
