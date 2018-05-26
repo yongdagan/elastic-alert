@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorEvent;
 import org.apache.curator.framework.api.CuratorListener;
 import org.apache.curator.framework.api.UnhandledErrorListener;
@@ -37,9 +35,9 @@ public class TaskLeader implements Closeable, LeaderLatchListener {
     private CountDownLatch recoveryLatch = new CountDownLatch(0);
     private Random rand = new Random(System.currentTimeMillis());
     
-    public TaskLeader(String clientId, String connectString, RetryPolicy retryPolicy) {
+    public TaskLeader(String clientId, CuratorFramework client) {
     	this.clientId = clientId;
-    	this.client = CuratorFrameworkFactory.newClient(connectString, retryPolicy);
+    	this.client = client;
     	this.leaderLatch = new LeaderLatch(this.client, CuratorConstant.ZK_LEADER_NODE, clientId);
         this.handlersCache = new PathChildrenCache(this.client, CuratorConstant.ZK_HANDLERS_NODE, true);
         this.tasksCache = new PathChildrenCache(this.client, CuratorConstant.ZK_TASKS_NODE, true);

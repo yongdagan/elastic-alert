@@ -5,6 +5,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +32,10 @@ public class TestController {
 	public String iptest() {
 		try {
 			String ip = InetAddress.getLocalHost().getHostAddress();
-			logger.info("请求获取本机IP：{}", ip);
+			logger.info("get server ip：{}", ip);
 			return ip;
 		} catch (UnknownHostException e) {
-			logger.error("请求获取本机IP失败", e);
+			logger.error("get server ip error", e);
 			return "error exists";
 		}
 	}
@@ -41,8 +43,12 @@ public class TestController {
 	@RequestMapping(value = "/addTaskLeader", method=RequestMethod.GET)
 	public void addTaskLeader(String clientId) {
 		try {
-			TaskLeader taskLeader = new TaskLeader(clientId, curatorConfig.getConnectString(),
-					new ExponentialBackoffRetry(curatorConfig.getRetryBaseSleepTime(), curatorConfig.getRetryTimes()));
+			CuratorFramework client = CuratorFrameworkFactory.builder()
+					.connectString(curatorConfig.getConnectString())
+					.retryPolicy(new ExponentialBackoffRetry(
+							curatorConfig.getRetryBaseSleepTime(), curatorConfig.getRetryTimes()))
+					.build();
+			TaskLeader taskLeader = new TaskLeader(clientId, client);
 			taskLeader.bootstrap();
 			taskLeader.runForMaster();
 			leaderList.add(taskLeader);

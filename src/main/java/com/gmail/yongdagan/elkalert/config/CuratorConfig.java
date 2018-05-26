@@ -31,12 +31,14 @@ public class CuratorConfig {
 	 */
 	private int retryTimes;
 	
-//	@Bean
-//	public CuratorFramework curatorFramework() {
-//		CuratorFramework client = CuratorFrameworkFactory.newClient(connectString,
-//				new ExponentialBackoffRetry(retryBaseSleepTime, retryTimes));
-//		return client;
-//	}
+	@Bean
+	public CuratorFramework curatorFramework() {
+		CuratorFramework client = CuratorFrameworkFactory.builder()
+				.connectString(connectString)
+				.retryPolicy(new ExponentialBackoffRetry(retryBaseSleepTime, retryTimes))
+				.build();
+		return client;
+	}
 
 	public String getConnectString() {
 		return connectString;

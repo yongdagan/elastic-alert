@@ -2,7 +2,6 @@ package com.gmail.yongdagan.elkalert.curator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.zookeeper.AsyncCallback.ChildrenCallback;
 import org.apache.zookeeper.AsyncCallback.DataCallback;
@@ -23,9 +22,6 @@ import com.gmail.yongdagan.elkalert.constant.CuratorConstant;
 public class RecoveredAssignments {
     private static final Logger logger = LoggerFactory.getLogger(RecoveredAssignments.class);
     
-    /*
-     * Various lists wew need to keep track of.
-     */
     List<String> tasks;
     List<String> assignments;
     List<String> status;
@@ -36,11 +32,6 @@ public class RecoveredAssignments {
     
     ZooKeeper zk;
     
-    /**
-     * Callback interface. Called once 
-     * recovery completes or fails.
-     *
-     */
     public interface RecoveryCallback {
         final static int OK = 0;
         final static int FAILED = -1;
