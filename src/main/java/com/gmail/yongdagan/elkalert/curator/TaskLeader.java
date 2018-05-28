@@ -93,7 +93,7 @@ public class TaskLeader implements Closeable, LeaderLatchListener {
 	public void close() throws IOException {
 		logger.info("Closing");
 		leaderLatch.close();
-		client.close();
+//		client.close();
 	}
 	
 	public boolean isConnected() {
@@ -112,15 +112,14 @@ public class TaskLeader implements Closeable, LeaderLatchListener {
     	// start curator client
     	client.start();
     	// bootstrap path
-    	this.tryToCreatePath(CuratorConstant.ZK_HANDLERS_NODE);
-    	this.tryToCreatePath(CuratorConstant.ZK_ASSIGN_NODE);
-    	this.tryToCreatePath(CuratorConstant.ZK_TASKS_NODE);
-    	this.tryToCreatePath(CuratorConstant.ZK_STATUS_NODE);
+    	this.tryToCreatePath(CuratorConstant.ZK_HANDLERS_NODE, CreateMode.PERSISTENT);
+    	this.tryToCreatePath(CuratorConstant.ZK_ASSIGN_NODE, CreateMode.PERSISTENT);
+    	this.tryToCreatePath(CuratorConstant.ZK_TASKS_NODE, CreateMode.PERSISTENT);
     }
     
-    private void tryToCreatePath(String path) {
+    private void tryToCreatePath(String path, CreateMode createMode) {
     	try {
-    		client.create().forPath(path, new byte[0]);
+    		client.create().withMode(createMode).forPath(path, new byte[0]);
 		} catch (NodeExistsException e) {
 			logger.info("node already exists, path=" + path);
 		} catch (Exception e) {
@@ -130,7 +129,7 @@ public class TaskLeader implements Closeable, LeaderLatchListener {
     
     public void runForMaster() throws Exception {
     	// register listeners
-        client.getCuratorListenable().addListener(masterListener);
+        client.getCuratorListenable().addListener(leaderListener);
         client.getUnhandledErrorListenable().addListener(errorsListener);
         
         logger.info("start master selection: " + clientId);
@@ -138,7 +137,7 @@ public class TaskLeader implements Closeable, LeaderLatchListener {
         leaderLatch.start();
     }
     
-    CuratorListener masterListener = new CuratorListener() {
+    CuratorListener leaderListener = new CuratorListener() {
         public void eventReceived(CuratorFramework client, CuratorEvent event){
             try{
             	logger.info("Event path: " + event.getPath());
